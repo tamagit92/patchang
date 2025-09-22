@@ -15,11 +15,14 @@
         const res = await fetch(sheetURL);
         const csv = await res.text();
 
-        // Ubah CSV → Tab Separated (TSV) agar Excel langsung pisah kolom
-        const tsv = csv.split("\n").map(row => row.split(",").join("\t")).join("\r\n");
+        const tsv = csv
+          .split(/\r?\n/)                       // pecah per baris
+          .filter(row => row.trim() !== "")     // buang baris kosong
+          .map(row => row.split(",").join("\t")) // ganti koma → tab
+          .join("\r\n");
 
         await navigator.clipboard.writeText(tsv);
-        alert("Data berhasil disalin! Buka Excel → pilih sel A1 (jangan double click) → Ctrl+V.");
+        alert("Data berhasil disalin! Sekarang paste di Excel (mulai sel A1).");
       } catch(err) {
         alert("Gagal mengambil data: " + err);
       }
