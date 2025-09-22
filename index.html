@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <title>Copy Data dari Google Sheets</title>
+</head>
+<body>
+  <button onclick="copyData()">Copy Data</button>
+
+  <script>
+    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAV3oPmr3m2ULsW4hPdf0s-cOWpFRS8eVJGVDROIyDUH0YKy1XZz1WefGQqH9ypWPDpYITEYT09WE0/pub?gid=0&single=true&output=csv";
+
+    async function copyData(){
+      try {
+        const res = await fetch(sheetURL);
+        const csv = await res.text();
+
+        // Ubah CSV → Tab Separated (TSV) agar Excel langsung pisah kolom
+        const tsv = csv.split("\n").map(row => row.split(",").join("\t")).join("\r\n");
+
+        await navigator.clipboard.writeText(tsv);
+        alert("Data berhasil disalin! Buka Excel → pilih sel A1 (jangan double click) → Ctrl+V.");
+      } catch(err) {
+        alert("Gagal mengambil data: " + err);
+      }
+    }
+  </script>
+</body>
+</html>
