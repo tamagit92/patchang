@@ -2,24 +2,123 @@
 <html lang="id">
 <head>
   <meta charset="utf-8" />
-  <title>Copy Data dari Google Sheets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laman Data Aplikasi Nilai Guru</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #ffffff;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      justify-content: space-between;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 1.8rem;
+      color: #222;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      flex-grow: 1;
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      transition: background-color 0.3s;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-success {
+      background-color: #28a745 !important;
+    }
+
+    .message {
+      margin-top: 15px;
+      font-size: 0.95rem;
+      color: #155724;
+      background-color: #d4edda;
+      padding: 10px 15px;
+      border-radius: 5px;
+      border: 1px solid #c3e6cb;
+      display: none;
+      text-align: center;
+      max-width: 300px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #999999;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.4rem;
+        margin-bottom: 30px;
+      }
+
+      button {
+        width: 80%;
+      }
+
+      .message {
+        width: 90%;
+      }
+    }
+  </style>
 </head>
 <body>
-  <button onclick="copyData()">Copy Data 1</button>
+  <h1>Laman Data Aplikasi Nilai Guru</h1>
+
+  <div class="container">
+    <button id="copyBtn" onclick="copyData()">Salin Data Terbaru</button>
+    <div id="msg" class="message">
+      Data Terbaru Berhasil diSalin.<br>
+      Silahkan Klik Tombol Perbarui yang ada di Aplikasi Nilai Guru.
+    </div>
+  </div>
+
+  <footer>
+    Dibuat dengan Cinta oleh Andria Tama
+  </footer>
 
   <script>
     const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAV3oPmr3m2ULsW4hPdf0s-cOWpFRS8eVJGVDROIyDUH0YKy1XZz1WefGQqH9ypWPDpYITEYT09WE0/pub?gid=0&single=true&output=csv";
 
-    // Parser CSV yang menghargai tanda kutip
     function parseCSVLine(line) {
       const result = [];
       let current = "";
       let inQuotes = false;
-
       for (let i = 0; i < line.length; i++) {
         const char = line[i];
         if (char === '"') {
-          inQuotes = !inQuotes; // buka/tutup kutipan
+          inQuotes = !inQuotes;
         } else if (char === ',' && !inQuotes) {
           result.push(current);
           current = "";
@@ -31,20 +130,32 @@
       return result;
     }
 
-    async function copyData(){
+    async function copyData() {
       try {
         const res = await fetch(sheetURL);
         const csv = await res.text();
-
-        // Konversi CSV ke TSV
         const tsv = csv
-          .split(/\r?\n/)                     // pecah per baris
-          .filter(row => row.trim() !== "")   // buang baris kosong
-          .map(row => parseCSVLine(row).join("\t")) // parse kolom dengan aman
+          .split(/\r?\n/)
+          .filter(row => row.trim() !== "")
+          .map(row => parseCSVLine(row).join("\t"))
           .join("\r\n");
 
         await navigator.clipboard.writeText(tsv);
-        alert("Data berhasil disalin! Buka Excel → pilih sel C6 → Ctrl+V.");
+
+        // Ubah warna tombol menjadi hijau
+        const btn = document.getElementById("copyBtn");
+        btn.classList.add("btn-success");
+
+        // Tampilkan pesan sukses
+        const msg = document.getElementById("msg");
+        msg.style.display = "block";
+
+        // Kembali biru otomatis setelah 10 detik
+        setTimeout(() => {
+          btn.classList.remove("btn-success");
+          msg.style.display = "none";
+        }, 10000); // 10000ms = 10 detik
+
       } catch(err) {
         alert("Gagal mengambil data: " + err);
       }
